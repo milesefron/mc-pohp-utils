@@ -1,0 +1,17 @@
+dt {
+	font-style: bold;
+	color: red
+}
+
+dd {
+	background-color: lightblue;
+}
+
+.redacted2 {
+	background-color: black;
+}
+
+.ford-book-staff-bio-other-appearanches {
+	list-style-type: none;
+	background: #ff9999;
+}
