@@ -31,16 +31,21 @@ def main(input):
             skipped.append(file)
             continue
 
-        processed.append(file)
+        
 
-        doc = Document(file)
-        html = docx2html.docx2html(doc)
+        try:
+            doc = Document(file)
+            html = docx2html.docx2html(doc)
 
-        out_file = file.replace('.docx', '.html')
-        parser = etree.XMLParser(remove_blank_text=True)
-        tree   = etree.parse(StringIO(html), parser)
-        tree.write(out_file, pretty_print=True)
-        created.append(out_file)
+            out_file = file.replace('.docx', '.html')
+            parser = etree.XMLParser(remove_blank_text=True)
+            tree   = etree.parse(StringIO(html), parser)
+            tree.write(out_file, pretty_print=True)
+            created.append(out_file)
+            processed.append(file)
+        except:
+            logger.error('could not open/process docx file ' + file)
+            skipped.append(file)
     
     for file in processed:
         logger.info('processed: ' + file)
@@ -70,7 +75,6 @@ if __name__ == '__main__':
     
     processed = main(input)
     
-    print('--------------------------------')
     if len(processed) == 0:
         logger.warning("We processed ZERO files.  This program needs .docx files as input to work properly.")
         logger.warning("Try re-running like so: python app-docx2html.py -i /path/to/file.docx")

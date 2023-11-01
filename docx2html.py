@@ -12,20 +12,28 @@ def handle_italics(para):
             str = str + "::ITALICS" + run.text + "ITALICS::"
         else:
             str = str + run.text
+    return str
+
+def handle_bf(para):
+    str = ""
+    for run in para.runs:
+        if run.bold:
+            str = str + "::BOLD" + run.text + "BOLD::"
+        else:
+            str = str + run.text
     
     return str
 
-
-
-def handle_redactions(para):
-    str = ""
-    for run in para.runs:
-        if re.search('REDACTEDTEXT', run.text):
-            str = str + " " + re.sub('REDACTEDTEXT', '::REDACTED REDACTEDTEXT REDACTED::', run.text)
-        else:
-            str = str + " " + run.text
-    return str
-
+def extract_speaker(para):
+    name_test = handle_bf(para)
+    if re.search('^::BOLD.*: BOLD::', name_test):
+        fields = name_test.split(': BOLD::')
+        if fields and len(fields) > 0:
+            speaker = fields[0]
+            speaker = re.sub('::BOLD', '', speaker)
+            speaker = re.sub('BOLD::', '', speaker)
+            return speaker
+    return None
 
 
 def docx2html(doc):
@@ -56,41 +64,28 @@ def docx2html(doc):
 
     for para in doc.paragraphs[first:]:
         
-
-        text = para.text
-
-        
-
+        speaker = extract_speaker(para)
         text = handle_italics(para)
 
 
         # does it have a named speaker?
-        match = re.search('^[A-Za-z]+ ?[A-Za-z]*:', text)
-        if match:
+        if speaker:
             
             # separate the speaker info
-            speaker = match.string[match.span()[0]:match.span()[1]-1]
-            speech = match.string[match.span()[1]+1:]
+            regex = '^' + speaker + ":"
+            speech = re.sub(regex, '', text)
 
             dt_element = etree.SubElement(dl_element, 'dt')
             dt_element.text = speaker
 
             dd_element = etree.SubElement(dl_element, 'dd')
             p_element  = etree.SubElement(dd_element, 'p')
-            
-            
-            
-                
-            # handle any redactions
             p_element.text = speech
             
 
         # if not, simple--we just append to the context
         else:
-            p_element  = etree.SubElement(dd_element, 'p')
-
-            # handle any redactions
-            
+            p_element  = etree.SubElement(dd_element, 'p')            
             p_element.text = text
             
 
