@@ -9,7 +9,7 @@ def handle_italics(para):
     str = ""
     for run in para.runs:
         if run.italic:
-            str = str + "::ITALICS " + run.text + " ITALICS::"
+            str = str + "::ITALICS" + run.text + "ITALICS::"
         else:
             str = str + run.text
     
