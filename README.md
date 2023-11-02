@@ -13,14 +13,20 @@ This program looks for .docx files (assuming that these will be in the format of
 There are three ways to run this program.
 
 First, with no arguments like so:
-`$ python app-docx2html.py`
+```
+$ python app-docx2html.py
+```
 In this case, the program will look for .docx files in $HOME/poh.  NB it doesn't do a full directory walk; just a shallow listing of files.
 
 The second method is to supply a different directory:
-`$ python app-docx2html.py ./directory-full-of-docx-files`
+```
+$ python app-docx2html.py /path/to/directory-full-of-docx-files
+```
 
 Lastly, you can point the program at a single .docx file:
-`$ python app-docx2html.py path-to-docx-file.docx`
+```
+$ python app-docx2html.py path-to-docx-file.docx
+```
 
 When the program is given a directory, it will ignore any files that don't have a .docx file extension.  If there are Word documents that aren't bona fide POHP interviews, the results will be unpredictable and probably not useful.
 
