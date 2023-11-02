@@ -7,6 +7,7 @@ import argparse
 import logging
 import os
 import sys
+import traceback
 
 import docx2html
 
@@ -31,11 +32,9 @@ def main(input):
             skipped.append(file)
             continue
 
-        
-
         try:
             doc = Document(file)
-            html = docx2html.docx2html(doc)
+            html = docx2html.docx2html(doc, file)
 
             out_file = file.replace('.docx', '.html')
             parser = etree.XMLParser(remove_blank_text=True)
@@ -43,7 +42,8 @@ def main(input):
             tree.write(out_file, pretty_print=True)
             created.append(out_file)
             processed.append(file)
-        except:
+        except Exception:
+            traceback.print_exc()
             logger.error('could not open/process docx file ' + file)
             skipped.append(file)
     

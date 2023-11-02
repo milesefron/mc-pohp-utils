@@ -23,8 +23,18 @@ def handle_bf(para):
             str = str + run.text
     return str
 
-def extract_speaker(para):
+def extract_speaker(para, file):
     name_test = handle_bf(para)
+    
+    
+    # need to hack things in case the terminating colon on the name slug is NOT bolded
+    if re.search('^BOLD[A-Za-z \\.]+BOLD: (?!BOLD)', name_test):
+        print(file)
+        print("FOUND NON-BOLDED COLON IN NAME SLUG.  You should open the docx file and edit the bolding in this line...")
+        print(para.text)
+        quit()
+
+
     if re.search('^BOLD.*:\s?BOLD', name_test):
         fields = re.split(':\s?BOLD', name_test)
         if not fields or len(fields) == 0:
@@ -37,7 +47,7 @@ def extract_speaker(para):
     return None
 
 
-def docx2html(doc):
+def docx2html(doc, file):
     # create an empty HTML element
     html_element = etree.Element('html')
 
@@ -65,9 +75,11 @@ def docx2html(doc):
 
     for para in doc.paragraphs[first:]:
         
-        speaker = extract_speaker(para)
+        speaker = extract_speaker(para, file)
         text = handle_italics(para)
 
+        print(speaker)
+        print(text)
 
         # does it have a named speaker?
         if speaker:
@@ -92,7 +104,7 @@ def docx2html(doc):
 
 
     string_version = etree.tostring(html_element).decode("utf-8").replace('::ITALICS', '<i>').replace('ITALICS::', '</i>')
-    string_version = re.sub('REDACTEDTEXT', '<span class="redacted2">REDACTEDTEXT</span>', string_version)
+    string_version = re.sub('R?E?DACTEDTEXT', '<span class="redacted2">REDACTEDTEXT</span>', string_version)
     return string_version
 
 

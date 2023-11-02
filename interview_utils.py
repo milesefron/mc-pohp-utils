@@ -46,7 +46,7 @@ def get_start_para(docx):
                 factor -= 10
 
             for tok in toks:
-                if tok[0].isupper():
+                if tok and tok[0].isupper():
                     factor +=1 # i.e. the tokens are capitalized like names
         #print(str(factor) + " " + line)
         factors.append(factor)

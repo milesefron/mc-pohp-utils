@@ -42,8 +42,7 @@ def docx2html(doc):
     # get the beginning of our interview proper
     first = interview_utils.get_start_para(doc)
 
-    print(first)
-    quit()
+    
 
     for para in doc.paragraphs[first:]:
         
