@@ -18,21 +18,22 @@ def handle_bf(para):
     str = ""
     for run in para.runs:
         if run.bold:
-            str = str + "::BOLD" + run.text + "BOLD::"
+            str = str + "BOLD" + run.text + "BOLD"
         else:
             str = str + run.text
-    
     return str
 
 def extract_speaker(para):
     name_test = handle_bf(para)
-    if re.search('^::BOLD.*: BOLD::', name_test):
-        fields = name_test.split(': BOLD::')
+    if re.search('^BOLD.*:\s?BOLD', name_test):
+        fields = re.split(':\s?BOLD', name_test)
+        if not fields or len(fields) == 0:
+            fields = name_test.split(':BOLD')
         if fields and len(fields) > 0:
             speaker = fields[0]
-            speaker = re.sub('::BOLD', '', speaker)
-            speaker = re.sub('BOLD::', '', speaker)
-            return speaker
+            speaker = re.sub('BOLD', '', speaker)
+            speaker = re.sub('BOLD', '', speaker)
+            return speaker    
     return None
 
 
@@ -91,7 +92,7 @@ def docx2html(doc):
 
 
     string_version = etree.tostring(html_element).decode("utf-8").replace('::ITALICS', '<i>').replace('ITALICS::', '</i>')
-    string_version = re.sub('R?EDACTEDTEXT', '<span class="redacted2">REDACTEDTEXT</span>', string_version)
+    string_version = re.sub('REDACTEDTEXT', '<span class="redacted2">REDACTEDTEXT</span>', string_version)
     return string_version
 
 
