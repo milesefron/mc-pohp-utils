@@ -12,7 +12,7 @@ import traceback
 import docx2html
 
 
-def main(input):
+def main(input, verbose):
     files = []
 
     file_count = 0
@@ -43,7 +43,8 @@ def main(input):
             created.append(out_file)
             processed.append(file)
         except Exception:
-            traceback.print_exc()
+            if verbose:
+                traceback.print_exc()
             logger.error('could not open/process docx file ' + file)
             skipped.append(file)
     
@@ -61,8 +62,9 @@ if __name__ == '__main__':
     logger.info("Started")
     
     parser = argparse.ArgumentParser(description='Process arguments.', add_help=False)
-    parser.add_argument("-i", "--input",  help="location of file(s) to process.  can be a directory or a single .docx file")
+    parser.add_argument("input",  nargs='?', help="location of file(s) to process.  can be a directory or a single .docx file")
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help="call this function with no argument to process docx files in $HOME/poh")
+    parser.add_argument('-v', '--verbose', default=False, action="store_true", help="Print out extra information")
     args = parser.parse_args()
 
     if args.input:
@@ -70,10 +72,11 @@ if __name__ == '__main__':
     else:
         input = str(Path.home()) + '/poh'
     
+    verbose = False
+    if args.verbose:
+        verbose = True
     
-
-    
-    processed = main(input)
+    processed = main(input, verbose)
     
     if len(processed) == 0:
         logger.warning("We processed ZERO files.  This program needs .docx files as input to work properly.")

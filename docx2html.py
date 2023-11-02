@@ -78,9 +78,6 @@ def docx2html(doc, file):
         speaker = extract_speaker(para, file)
         text = handle_italics(para)
 
-        print(speaker)
-        print(text)
-
         # does it have a named speaker?
         if speaker:
             
