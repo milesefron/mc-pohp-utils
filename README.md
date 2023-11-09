@@ -1,5 +1,5 @@
 # mc-pohp-utils
-Utility for manipulating collections of book-length interview documents.  For now the main bit of functionality is `app-docx2html.py`, which translates a docx-formatted interview into HTML.
+Utility for manipulating collections of book-length interview documents.  For now the main bit of functionality is `docx2html.py`, which translates a docx-formatted interview into HTML.
 
 # setup
 ```
@@ -14,18 +14,18 @@ There are three ways to run this program.
 
 First, with no arguments like so:
 ```
-$ python app-docx2html.py
+$ python docx2html.py
 ```
 In this case, the program will look for .docx files in $HOME/poh.  NB it doesn't do a full directory walk; just a shallow listing of files.
 
 The second method is to supply a different directory:
 ```
-$ python app-docx2html.py /path/to/directory-full-of-docx-files
+$ python docx2html.py /path/to/directory-full-of-docx-files
 ```
 
 Lastly, you can point the program at a single .docx file:
 ```
-$ python app-docx2html.py path-to-docx-file.docx
+$ python docx2html.py path-to-docx-file.docx
 ```
 
 When the program is given a directory, it will ignore any files that don't have a .docx file extension.  If there are Word documents that aren't bona fide POHP interviews, the results will be unpredictable and probably not useful.
@@ -63,11 +63,11 @@ This works in almost all cases.  However, every now and then you'll see somethin
 i.e. the colon is OUTSIDE of the boldface.  We originally tried to resolve these automatically, but found that there were unpredictable edge cases that made this too risky.  As such, you may see the program bomb out with an error like this:
 
 ```
-/Users/foo/poh/zzz_donezo/Wexler_Anne.docx
+/Users/foo/poh/zzz_donezo/Alpha_Beta.docx
 FOUND NON-BOLDED COLON IN NAME SLUG.  You should open the docx file and edit the bolding in this line...
 Chanin: Oh yes. A fourth type of meeting included very large sessions in the East Room with the President speaking on a particular issue. At the deputy level this required you to watch the logistics. We had an excellent bunch of people to handle this area on our staff. As you know the mesh of logistics with politics happens very quickly.
 ```
 
-This means that you should go edit the docx file `/Users/foo/poh/zzz_donezo/Wexler_Anne.docx`, looking for the shown line, and bringing the colon inside the boldface.
+This means that you should go edit the docx file `/Users/foo/poh/zzz_donezo/Alpha_Beta.docx`, looking for the shown line, and bringing the colon inside the boldface.
 
 These should be rarities, but now you've been warned.

@@ -1,113 +1,88 @@
 from docx import Document
+from io import StringIO 
 from lxml import etree
-import re
-import interview_utils
+from pathlib import Path
+from tqdm import tqdm
+import argparse
+import logging
+import os
+import sys
+import traceback
+
+import interview_transform
 
 
+def main(input, verbose):
+    files = []
 
-def handle_italics(para):
-    str = ""
-    for run in para.runs:
-        if run.italic:
-            str = str + "::ITALICS" + run.text + "ITALICS::"
-        else:
-            str = str + run.text
-    return str
+    file_count = 0
+    # we can either process a dir full of files or a single file
+    if os.path.isdir(input):
+        local_files = os.listdir(input)
+        for file in local_files:
+            files.append(os.path.join(input, file))
+    elif os.path.isfile(input):
+        files.append(input)
 
-def handle_bf(para):
-    str = ""
-    for run in para.runs:
-        if run.bold:
-            str = str + "BOLD" + run.text + "BOLD"
-        else:
-            str = str + run.text
-    return str
+    processed = []
+    skipped = []  
+    created = [] 
+    for file in tqdm(files):
+        if '.docx' not in file:
+            skipped.append(file)
+            continue
 
-def extract_speaker(para, file):
-    name_test = handle_bf(para)
+        try:
+            doc = Document(file)
+            html = interview_transform.docx2html(doc, file)
+
+            out_file = file.replace('.docx', '.html')
+            parser = etree.XMLParser(remove_blank_text=True)
+            tree   = etree.parse(StringIO(html), parser)
+            tree.write(out_file, pretty_print=True)
+            created.append(out_file)
+            processed.append(file)
+        except Exception:
+            if verbose:
+                traceback.print_exc()
+            logger.error('could not open/process docx file ' + file)
+            skipped.append(file)
     
+    for file in processed:
+        logger.info('processed: ' + file)
+    for file in skipped:
+        logger.info('skipped: ' + file)
+
+    return created
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger('POH')
+    logger.info("Started")
     
-    # need to hack things in case the terminating colon on the name slug is NOT bolded
-    if re.search('^BOLD[A-Za-z \\.]+BOLD: (?!BOLD)', name_test):
-        print(file)
-        print("FOUND NON-BOLDED COLON IN NAME SLUG.  You should open the docx file and edit the bolding in this line...")
-        print(para.text)
-        quit()
+    parser = argparse.ArgumentParser(description='Process arguments.', add_help=False)
+    parser.add_argument("input",  nargs='?', help="location of file(s) to process.  can be a directory or a single .docx file")
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help="call this function with no argument to process docx files in $HOME/poh")
+    parser.add_argument('-v', '--verbose', default=False, action="store_true", help="Print out extra information")
+    args = parser.parse_args()
 
-
-    if re.search('^BOLD.*:\s?BOLD', name_test):
-        fields = re.split(':\s?BOLD', name_test)
-        if not fields or len(fields) == 0:
-            fields = name_test.split(':BOLD')
-        if fields and len(fields) > 0:
-            speaker = fields[0]
-            speaker = re.sub('BOLD', '', speaker)
-            speaker = re.sub('BOLD', '', speaker)
-            return speaker    
-    return None
-
-
-def docx2html(doc, file):
-    # create an empty HTML element
-    html_element = etree.Element('html')
-
-    # create the head element
-    head_element = etree.SubElement(html_element, 'head')
-    title_element = etree.SubElement(head_element, 'title')
-    style_element = etree.SubElement(head_element, 'link')
-    style_element.attrib['rel'] = 'stylesheet'
-    style_element.attrib['href'] = 'style.css'
-    title_element.text = 'Document Title'
-
-    body_element = etree.SubElement(html_element, 'body')
-    dl_element = etree.SubElement(body_element, 'dl')
-
-    conversation = []
-    context = []
-    dd_elelment = None
-    dt_element = None
-    p_element = None
-
-    # get the beginning of our interview proper
-    first = interview_utils.get_start_para(doc)
-
-
-
-    for para in doc.paragraphs[first:]:
-        
-        speaker = extract_speaker(para, file)
-        text = handle_italics(para)
-
-        # does it have a named speaker?
-        if speaker:
-            
-            # separate the speaker info
-            regex = '^' + speaker + ":"
-            speech = re.sub(regex, '', text)
-
-            dt_element = etree.SubElement(dl_element, 'dt')
-            dt_element.text = speaker
-
-            dd_element = etree.SubElement(dl_element, 'dd')
-            p_element  = etree.SubElement(dd_element, 'p')
-            p_element.text = speech
-            
-
-        # if not, simple--we just append to the context
-        else:
-            p_element  = etree.SubElement(dd_element, 'p')            
-            p_element.text = text
-            
-
-
-    string_version = etree.tostring(html_element).decode("utf-8").replace('::ITALICS', '<i>').replace('ITALICS::', '</i>')
-    string_version = re.sub('R?E?DACTEDTEXT', '<span class="redacted2">REDACTEDTEXT</span>', string_version)
-    return string_version
-
-
-
-
-        
-
-
-
+    if args.input:
+        input = args.input
+    else:
+        input = str(Path.home()) + '/poh'
+    
+    verbose = False
+    if args.verbose:
+        verbose = True
+    
+    processed = main(input, verbose)
+    
+    if len(processed) == 0:
+        logger.warning("We processed ZERO files.  This program needs .docx files as input to work properly.")
+        logger.warning("Try re-running like so: python app-docx2html.py -i /path/to/file.docx")
+        logger.warning("...or python app-docx2html.py /path/to/directory/with/docx_files_in_it/")
+    else:
+        for file in processed:
+            logger.info('created: ' + file)
+    logger.info("Finished")
