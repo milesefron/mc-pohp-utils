@@ -1,5 +1,5 @@
 # mc-pohp-utils
-Utility for manipulating collections of book-length interview documents.  For now the main bit of functionality is `docx2html.py`, which translates a docx-formatted interview into HTML.
+Utility for publishing collections of book-length interview documents on the web.  For now the main bit of functionality is `docx2html.py`, which translates a docx-formatted interview into HTML.
 
 # setup
 ```
