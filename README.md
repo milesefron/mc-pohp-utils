@@ -1,13 +1,13 @@
 # mc-pohp-utils
 Utility for publishing collections of book-length interview documents on the web.  For now the main bit of functionality is `docx2html.py`, which translates docx-formatted interviews into HTML.
 
-# setup
+# Setup
 ```
 git clone https://github.com/milesefron/mc-pohp-utils.git
 pip install -r requirements.txt
 ```
 
-# running
+# Running
 This program looks for .docx files (assuming that these will be in the format of Miller Center POHP interviews).  It will translate each .docx file it finds into a corresponding .html file, in the same directory as the .docx file.
 
 There are three ways to run this program.
@@ -32,7 +32,7 @@ When the program is given a directory, it will ignore any files that don't have 
 
 There is also a `-v` aka `--verbose` flag.  This only has an effect if there is trouble during the parsing or processing of documents.  In that case, any stacktraces will be shown.
 
-# understanding
+# Understanding
 This program is intended for use by Miller Center POHP staff.  We often need to translate multiple long-form interview files from docx to html.  This only works because the interviews follow a highly structured format.  This software has been tested on over 100 interviews and works well on them.  But it is somewhat brittle and its output should be checked before publishing results, especially in these cases:
 * Redactions. Be sure that all redactions seem to have been rendered properly.
 * Name headings.  If interview personnell have unusually formatted names (e.g. with multiple titles or middle names), check closely that they appear correctly.
@@ -42,7 +42,7 @@ If you need to alter the way the program handles interviews, you'll want to edit
 * `docx2html.py`, which is where the heavy lifting happens
 * `interview_utils.py` which contains some basic helper code.
 
-# troubleshooting
+# Troubleshooting
 One thing to be aware of: this program tries to figure out who is speaking by looking for names with this logic:
 * at the beginning of a line
 * is it bolded?
@@ -71,3 +71,33 @@ Chanin: Oh yes. A fourth type of meeting included very large sessions in the Eas
 This means that you should go edit the docx file `/Users/foo/poh/zzz_donezo/Alpha_Beta.docx`, looking for the shown line, and bringing the colon inside the boldface.
 
 These should be rarities, but now you've been warned.
+
+
+# Addendum: Uploading PDF Materials to AWS
+This repo also contains a program that will upload PDF materials (transcripts and/or briefing books) to their relevant locations in AWS for web display.  This program is `upload-materials.py` and it works similarly to what we described earlier.  For instance, invoking it like so:
+
+```
+$ python upload-materials.py
+```
+
+will look for PDF files in `$HOME/poh`, sending any with `interview.pdf` or `backgroundmaterials.pdf` to their respective AWS S3 buckets.  As the program uploads the files, it logs each uploaded file's public URL for inclusion
+on the web.  
+
+You can also feed this program a single file to upload, as in:
+
+```
+$ python upload-materials.py /path/to/file.backgroundmaterials.pdf
+```
+
+or
+```
+$ python upload-materials.py /path/to/file.interview.pdf
+```
+
+Lastly, you can give this program a directory to process like in the default invocation, where
+
+```
+$ python upload-materials.py /path/to/directory/full/of/files
+```
+will send any files with `interview.pdf` or `backgroundmaterials.pdf` to their respective AWS S3 buckets.  As the program uploads the files, it logs each uploaded file's public URL for inclusion
+on the web. 
