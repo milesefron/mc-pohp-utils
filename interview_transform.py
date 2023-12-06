@@ -46,6 +46,7 @@ def extract_speaker(para, file):
         print(file)
         print("FOUND NON-BOLDED COLON IN NAME SLUG.  You should open the docx file and edit the bolding in this line...")
         print(para.text)
+        print(name_test)
         quit()
 
 
