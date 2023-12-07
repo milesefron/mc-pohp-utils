@@ -4,6 +4,7 @@ from botocore.exceptions import ClientError
 import logging
 import os
 import json
+import mimetypes
 
 AWS_PARAMETER_S3BUCKET_BRIEFING_BOOKS = '/poh-utils/s3-buckets/briefing-books'
 AWS_PARAMETER_S3BUCKET_TRANSCRIPTS    = '/poh-utils/s3-buckets/transcripts'
@@ -50,15 +51,18 @@ def upload_pdf(path_to_file, file_type):
     # separate the file name from the path
     file_name = os.path.basename(path_to_file)
 
+    file_mime_type = mimetypes.guess_type(file_name)
+
     # do the heavy lifting
     s3_client = boto3.client('s3')
     response = None
     try:
-        response = s3_client.upload_file(path_to_file, s3_bucket, file_name)
+        response = s3_client.upload_file(path_to_file, s3_bucket, file_name, ExtraArgs={'ContentType': 'application/pdf'})
         return get_public_url(file_name, file_type)
     except ClientError as e:
         logging.error(e)
         return False
+
 
 
     
