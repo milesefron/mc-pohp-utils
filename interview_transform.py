@@ -145,8 +145,9 @@ def docx2html(doc, file, verbose, debug):
 
         # if not, simple--we just append to the context
         else:
-            p_element  = etree.SubElement(dd_element, 'p')            
-            p_element.text = text
+            if text and len(text) > 0:
+                p_element  = etree.SubElement(dd_element, 'p')            
+                p_element.text = text
             
 
 
