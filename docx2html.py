@@ -12,7 +12,7 @@ import traceback
 import interview_transform
 
 
-def main(input, verbose):
+def main(input, verbose, debug):
     files = []
 
     file_count = 0
@@ -34,7 +34,7 @@ def main(input, verbose):
 
         try:
             doc = Document(file)
-            html = interview_transform.docx2html(doc, file)
+            html = interview_transform.docx2html(doc, file, verbose, debug)
 
             out_file = file.replace('.docx', '.html')
             parser = etree.XMLParser(remove_blank_text=True)
@@ -43,8 +43,8 @@ def main(input, verbose):
             created.append(out_file)
             processed.append(file)
         except Exception:
-            if verbose:
-                traceback.print_exc()
+            #if verbose:
+            #    traceback.print_exc()
             logger.error('could not open/process docx file ' + file)
             skipped.append(file)
     
@@ -65,6 +65,7 @@ if __name__ == '__main__':
     parser.add_argument("input",  nargs='?', help="location of file(s) to process.  can be a directory or a single .docx file")
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help="call this function with no argument to process docx files in $HOME/poh")
     parser.add_argument('-v', '--verbose', default=False, action="store_true", help="Print out extra information")
+    parser.add_argument('-d', '--debug', default=False, action="store_true", help="Print debug info")
     args = parser.parse_args()
 
     if args.input:
@@ -76,7 +77,12 @@ if __name__ == '__main__':
     if args.verbose:
         verbose = True
     
-    processed = main(input, verbose)
+    debug = False
+    if args.debug:
+        debug = True
+    print("DEBUG: " + str(debug))
+    
+    processed = main(input, verbose, debug)
     
     if len(processed) == 0:
         logger.warning("We processed ZERO files.  This program needs .docx files as input to work properly.")

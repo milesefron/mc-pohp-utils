@@ -97,7 +97,7 @@ def get_start_para(docx):
     return next(x for x, val in enumerate(factors) if val > 2) 
 
 
-def docx2html(doc, file):
+def docx2html(doc, file, verbose, debug):
     # create an empty HTML element
     html_element = etree.Element('html')
 
@@ -125,6 +125,9 @@ def docx2html(doc, file):
         speaker = extract_speaker(para, file)
         text = handle_italics(para)
 
+        if debug:
+            print(text)
+     
         # does it have a named speaker?
         if speaker:
             
